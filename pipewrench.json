@@ -1,0 +1,13 @@
+{
+  "modInfo": {
+    "name": "Hunger Games",
+    "poster": "./poster.png",
+    "description": "Fart",
+    "id": "HungerGamesMod",
+    "url": "https://www.google.com,"
+  },
+  "modelsDir": "./src/models",
+  "texturesDir": "./src/textures",
+  "soundDir": "./src/sound",
+  "scriptsDir": "./src/scripts"
+}
