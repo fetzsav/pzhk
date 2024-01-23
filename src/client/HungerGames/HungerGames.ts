@@ -1,21 +1,48 @@
-import { getPlayer } from "@asledgehammer/pipewrench"
-import { onAddMessage, onCoopServerMessage, onServerCommand } from "@asledgehammer/pipewrench-events"
+import { ISContextMenu, ISDebugMenu, ISModalDialog, getPlayer, isClient, sendClientCommand } from "@asledgehammer/pipewrench"
+import * as Events from '@asledgehammer/pipewrench-events';
 
-onServerCommand.addListener((module, command, args) => {
-    getPlayer().Say("Received command")
-    // if (module != "TestMod") return
 
+
+
+
+
+
+
+
+Events.onServerCommand.addListener((module, command, args) => {
+    if (module != "HungerGames") return
+    if (!isClient()) return
     if (command == "pong") {
-        getPlayer().Say("Received command pong!")
+        if (args.command == "register") {
+            print(args.res);
+        }
     }
-
 })
 
 
-onAddMessage.addListener((message, tab) => {
-    const client = getPlayer().Say("I just sent a message");
-    const playername = getPlayer().getName();
-    print(playername);
-    print("THANKS FOR YOUR MESSAGE");
+Events.onAddMessage.addListener((chatMessage, tab) => {
+    if (isClient()) {
+        if (chatMessage.getText() == "!hg join") {
+            sendClientCommand(getPlayer(), "HungerGames", "ping", {"command": "register"})
+        }
+        if (chatMessage.getText() == "!hg create") {
+            sendClientCommand(getPlayer(), "HungerGames", "ping", {"command": "create"})
+        }
+        if (chatMessage.getText() == "!hg start") {
+            sendClientCommand(getPlayer(), "HungerGames", "ping", {"command": "start"})
+        }
+        if (chatMessage.getText() == "!hg menu") {
+            openMenu();
+        }
+    }
   })
 
+
+const openMenu = () => {
+    
+    const debugMenu = new ISContextMenu(0, 0, 100, 100, 100);
+    debugMenu.mainButton = "Join Game";
+    debugMenu.setUIName("Hunger Games");
+    
+    debugMenu.addToUIManager();
+}
