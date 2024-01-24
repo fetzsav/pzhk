@@ -8,7 +8,7 @@
 
 // PipeWrench API.
 import * as Events from '@asledgehammer/pipewrench-events';
-import { IsoPlayer, ItemContainer, isServer, sendServerCommand} from "@asledgehammer/pipewrench"
+import { ISBarbedWire, ISBuildingObject, IsoPlayer, IsoThumpable, ItemContainer, getCell, getWorld, isServer, sendServerCommand} from "@asledgehammer/pipewrench"
 import { HungerGameMatch, HungerGameState } from './api/HungerGamesAPI';
 // Example reference API.
 
@@ -37,6 +37,12 @@ Events.onClientCommand.addListener((module, command, player, args) => {
           createMatch();
           print(state.matches.length);
       }
+      if (args.command == "build") {
+        createWall(args.x, args.y, args.z, "fencing_01_92")
+    }
+    if (args.command == "jail") {
+        jailPlayer(player)
+    }
   }
 })
 
@@ -67,3 +73,30 @@ const createMatch = () => {
   };
   state.matches.push(match);
 }
+
+const createWall = (x: any, y: any, z: any, wallname: string) => {
+    const cell = getWorld().getCell();
+    const square = cell.getGridSquare(x, y, z);
+    const wall = new IsoThumpable(cell, square, wallname,  false, {})
+    wall.setName("Wall");
+    wall.setIsThumpable(false);
+    square.AddSpecialObject(wall);
+    wall.transmitCompleteItemToClients();
+}
+
+const jailPlayer = (player: IsoPlayer) => {
+    const playerX = player.getX();
+    const playerY = player.getY();
+    const playerZ = player.getZ();
+    //top corner
+    createWall(playerX, playerY, playerZ, "fencing_01_92");
+    //bottom right corner
+    createWall(playerX+1, playerY, playerZ, "fencing_01_90");
+    //bottom left corner
+    createWall(playerX, playerY+1, playerZ, "fencing_01_89");
+}
+
+
+//fencing_01_92 - top corner
+//fencing_01_90 - top / bottom
+//fencing_01_89 - bottom corner
