@@ -34,13 +34,6 @@ Events.onAddMessage.addListener((chatMessage, tab) => {
         if (chatMessage.getText() == "!hg menu") {
             openMenu();
         }
-        if (chatMessage.getText() == "!hg build") {
-            const players = getPlayer();
-            const x = players.getX();
-            const y = players.getY();
-            const z = players.getZ();
-            sendClientCommand(getPlayer(), "HungerGames", "ping", {"command": "build", "x": x, "y": y, "z": z})
-        }
         if (chatMessage.getText() == "!jail") {
             const player = getPlayer();
             sendClientCommand(getPlayer(), "HungerGames", "ping", {"command": "jail", "player": player})
