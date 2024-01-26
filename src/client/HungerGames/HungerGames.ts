@@ -19,12 +19,18 @@ Events.onAddMessage.addListener((chatMessage, tab) => {
         if (chatMessage.getText() == "!hg join") {
             sendClientCommand(getPlayer(), "HungerGames", "ping", {"command": "register"})
         }
-        if (chatMessage.getText() == "!hg create") {
-            sendClientCommand(getPlayer(), "HungerGames", "ping", {"command": "create"})
+        if (chatMessage.getText().includes("!hg create")) {
+            const height = chatMessage.getText().split(" ")[2];
+            const width = chatMessage.getText().split(" ")[3];
+            sendClientCommand(getPlayer(), "HungerGames", "ping", {"command": "create", "height": height, "width": width })
+        }
+        if (chatMessage.getText() == "!hg clean") {
+            sendClientCommand(getPlayer(), "HungerGames", "ping", {"command": "clean"})
         }
         if (chatMessage.getText() == "!hg start") {
             sendClientCommand(getPlayer(), "HungerGames", "ping", {"command": "start"})
         }
+        
         if (chatMessage.getText() == "!hg menu") {
             openMenu();
         }
