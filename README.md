@@ -4,16 +4,18 @@
 <img src="https://i.imgur.com/IUaST1p.png"/>
 </p>
 
-JailMP is a simple multiplayer jailer mod for the game Project Zomboid. Functionality is chat-based, and would typically be used as an admin command.
+JailMP is a simple multiplayer jailer mod for the game Project Zomboid. This mod was coded in Typescript using Pipewrench. The Typescript files can be found in the *src/* folder, and **the transpiled Lua files can be found in the *dist/* folder**
 
-Jail player:
-```
-!jail [playername]
-```
 
-Unjail player:
+Functionality is chat-based, and would typically be used as an admin command. In the current version, only Admins can use the *jail* commands.
+
+To use, send a chat message as follows
+
 ```
-!unjail [playername]
+!jail [username]
+```
+```
+!unjail [username]
 ```
 
 
