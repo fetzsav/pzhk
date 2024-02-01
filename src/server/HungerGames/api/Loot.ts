@@ -1,3 +1,5 @@
+import { InventoryItem, IsoObject, getWorld, isServer } from "@asledgehammer/pipewrench";
+
 interface Coordinates {
     x: number;
     y: number;
@@ -39,7 +41,6 @@ const OtherList: string[] = []
 const createContainer = (loot: Loot) => {
     //possible items
     const itemList: string[] = [];
-
     // Add items to the list based on the loot type
     for (const type of loot.type) {
         switch (type) {
@@ -57,10 +58,8 @@ const createContainer = (loot: Loot) => {
                 break;
         }
     }
-
     // Select items to be added in crate
     const spawnedItems = getRandomItems(itemList);
-
     // Create the container
     switch (loot.size) {
         case ContainerSize.Small:
@@ -71,6 +70,7 @@ const createContainer = (loot: Loot) => {
             break;
         case ContainerSize.Large:
             // Create large container
+            spawnContainer(BigCrate[0], loot.location, spawnedItems);
             break;
     }
 
@@ -86,7 +86,30 @@ const getRandomItems = (itemList: string[]) => {
     return items;
 }
 
-const spawnLoot = (lootList: Loot[]) => {
+
+const spawnContainer = (object_name: string, location: Coordinates, item_list: string[]) => {
+    if(!isServer()) return;
+
+    //Get cell + spawn IsoObject
+    const cell = getWorld().getCell();
+    const square = cell.getGridSquare(location.x, location.y, location.z);
+    const object = new IsoObject(cell, square, object_name,  false)
+    object.setName("hg_container");
+
+    //Fill container with loot
+    let container = object.getContainer();
+    for (const item of item_list) {
+        let added = container.AddItem(item);
+        container.addItemOnServer(added as InventoryItem);
+    }
+
+    //Transmit Object to clients
+    square.AddSpecialObject(object);
+    object.transmitCompleteItemToClients();
+}
+
+
+const spawnAllLoot = (lootList: Loot[]) => {
     for (const loot of lootList) {
         createContainer(loot);
     }
