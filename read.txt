@@ -5,3 +5,42 @@ Burryaga — Today at 9:19 PM
 ISPanelJoypad.
 Burryaga — Today at 9:20 PM
 Several examples based on vanilla available in Wookiee Gamepad Support
+
+
+
+
+cerb_audio — Today at 12:26 PM
+if you are trying to setup sandbox settings
+
+make a text file "sandbox-options" in media
+should also setup text file "Sandbox_EN" translations in shared/Translate/EN
+
+sandbox-options:
+VERSION = 1,
+
+option ModName.exampleBooleanSetting
+{
+    type = boolean, default = true,
+    page = ModName, translation = exampleBooleanSetting,
+}
+
+option ModName.exampleNumberSetting
+{
+    type = double, min = 0.0, max = 100.0, default = 2.0,
+    page = ModName, translation = exampleNumberSetting,
+}
+
+
+Sandbox_EN:
+Sandbox_EN = {
+    Sandbox_ModName = "Name of this mod in Sandbox Settings menu",
+
+    Sandbox_exampleBooleanSetting = "Name of the setting",
+    Sandbox_exampleBooleanSetting_tooltip = "This message shows when hovering over the text",
+}
+then to read the settings at runtime:
+local myBooleanSetting = nil;
+local function myModSettings()
+  myBooleanSetting = getSandboxOptions():getOptionByName("ModName.exampleBooleanSetting"):getValue();
+end;
+Events.OnInitGlobalModData.Add(myModSettings);

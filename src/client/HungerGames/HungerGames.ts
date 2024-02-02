@@ -38,6 +38,18 @@ Events.onAddMessage.addListener((chatMessage, tab) => {
             const player = getPlayer();
             sendClientCommand(getPlayer(), "HungerGames", "ping", {"command": "jail", "player": player})
         }
+        if (chatMessage.getText() == "!container") {
+            const player = getPlayer();
+            sendClientCommand(getPlayer(), "HungerGames", "ping", {"command": "container"})
+        }
+        if (chatMessage.getText() == "!coords") {
+            const player = getPlayer();
+            sendClientCommand(getPlayer(), "HungerGames", "ping", {"command": "coords"})
+        }
+        if (chatMessage.getText() == "!arena1") {
+            const player = getPlayer();
+            sendClientCommand(getPlayer(), "HungerGames", "ping", {"command": "arena1"})
+        }
     }
   })
 

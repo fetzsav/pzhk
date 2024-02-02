@@ -10,7 +10,9 @@
 import * as Events from '@asledgehammer/pipewrench-events';
 import { ISBarbedWire, ISBuildingObject, IsoPlayer, IsoThumpable, ItemContainer, getCell, getOnlinePlayers, getWorld, isServer, sendServerCommand} from "@asledgehammer/pipewrench"
 import { HungerGameMatch, HungerGameState } from './api/HungerGamesAPI';
-import { createArena, cleanArena, jailPlayer } from './api/HungerGamesAPI';
+import { jailPlayer } from './api/HungerGamesAPI';
+import { Coordinates, spawnContainer } from './api/Loot';
+import { cleanArena, createArena, createArena1 } from './api/Arena';
 // Example reference API.
 
 
@@ -51,8 +53,29 @@ Events.onClientCommand.addListener((module, command, player, args) => {
     if (args.command == "jail") {
         jailPlayer(player.getUsername())
     }
+    if (args.command == "container") {
+        const location: Coordinates = {
+            x: player.getX(),
+            y: player.getY(),
+            z: player.getZ()
+        }
+        spawnContainer("carpentry_01_18", location, ["HCMakeshiftaxe", "HCBattleaxeiron"]);
+    }
+    if (args.command == "coords") {
+        getCoords(player)
+    }
+    if (args.command == "arena1") {
+        createArena1();
+    }
   }
 })
+
+const getCoords = (player: IsoPlayer) => {
+    const x = player.getX();
+    const y = player.getY();
+    const z = player.getZ();
+    print(`X: ${x}, Y: ${y}, Z: ${z}`)
+}
 
 
 const registerForGame = (player: IsoPlayer) => {

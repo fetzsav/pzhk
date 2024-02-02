@@ -1,26 +1,26 @@
-import { InventoryItem, IsoObject, getWorld, isServer } from "@asledgehammer/pipewrench";
+import { BufferedWriter, InventoryItem, IsoObject, ItemContainer, ZombRand, getPlayer, getWorld, isServer } from "@asledgehammer/pipewrench";
 
-interface Coordinates {
+export interface Coordinates {
     x: number;
     y: number;
     z: number;
 
 }
 
-enum LootType {
+export enum LootType {
     Food,
     Weapons,
     Medical,
     Other
 }
 
-enum ContainerSize {
+export enum ContainerSize {
     Small,
     Medium,
     Large
 }
 
-interface Loot {
+export interface Loot {
     type: LootType[];
     location: Coordinates;
     size: ContainerSize;
@@ -32,34 +32,44 @@ const BigCrate: string[] = ["carpentry_01_18"]
 
 
 // Possible items
-const WeaponList: string[] = ["HCMakeshiftaxe", "HCBattleaxeiron"]
-const FoodList: string[] = []
-const MedicalList: string[] = []
+const WeaponList: string[] = ["Base.Axe", "Base.BaseballBat", "Base.Broom", "Base.Crowbar", "Base.Shovel", "Base.HandScythe", "Base.PipeWrench", "Base.SnowShovel"]
+const ArmorList: string[] = ["Base.Hat_Army", "Base.Hat_BalaclavaFace", "Base.Hat_BalaclavaFull", "Base.Hat_HockeyHelmet", "Base.Hat_RidingHelmet"]
+const FoodList: string[] = ["Base.CannedPeachesOpen", "Base.CannedPineappleOpen", "Base.CannedFruitCocktailOpen", "Base.BerryBlue", "Base.Pancakes"]
+const MedicalList: string[] = ["Base.AlcoholRippedSheets", "Base.Pills", "Base.Bandage", "Base.Bandaid", "Base.AlcoholWipes", "Base.Disinfectant", "Base.Splint"]
 const OtherList: string[] = []
 
 
 const createContainer = (loot: Loot) => {
+
     //possible items
     const itemList: string[] = [];
     // Add items to the list based on the loot type
     for (const type of loot.type) {
         switch (type) {
             case LootType.Food:
-                itemList.push(...FoodList);
+                for (const food of FoodList) {
+                    itemList.push(food);
+                }
                 break;
             case LootType.Weapons:
-                itemList.push(...WeaponList);
+                for (const weapon of WeaponList) {
+                    itemList.push(weapon);
+                }
                 break;
             case LootType.Medical:
-                itemList.push(...MedicalList);
+                for (const medical of MedicalList) {
+                    itemList.push(medical);
+                }
                 break;
             case LootType.Other:
-                itemList.push(...OtherList);
+                for (const other of OtherList) {
+                    itemList.push(other);
+                }
                 break;
         }
     }
     // Select items to be added in crate
-    const spawnedItems = getRandomItems(itemList);
+    const spawnedItems = getRandomItems(itemList, 6);
     // Create the container
     switch (loot.size) {
         case ContainerSize.Small:
@@ -76,18 +86,19 @@ const createContainer = (loot: Loot) => {
 
 }
 
-const getRandomItems = (itemList: string[]) => {
+const getRandomItems = (itemList: string[], amount: number) => {
     const items: string[] = [];
-    const numberOfItems = Math.floor(Math.random() * 5) + 1;
-    for (let i = 0; i < numberOfItems; i++) {
-        const item = itemList[Math.floor(Math.random() * itemList.length)];
+    // const numberOfItems = Math.floor(Math.random() * 5) + 1;
+    for (let i = 0; i < amount; i++) {
+        const random_index = ZombRand(0, itemList.length);
+        const item = itemList[random_index];
         items.push(item);
     }
     return items;
 }
 
 
-const spawnContainer = (object_name: string, location: Coordinates, item_list: string[]) => {
+export const spawnContainer = (object_name: string, location: Coordinates, item_list: string[]) => {
     if(!isServer()) return;
 
     //Get cell + spawn IsoObject
@@ -97,20 +108,24 @@ const spawnContainer = (object_name: string, location: Coordinates, item_list: s
     object.setName("hg_container");
 
     //Fill container with loot
-    let container = object.getContainer();
-    for (const item of item_list) {
-        let added = container.AddItem(item);
-        container.addItemOnServer(added as InventoryItem);
-    }
-
     //Transmit Object to clients
     square.AddSpecialObject(object);
+    object.setContainer(new ItemContainer())
+    const container = object.getContainer();
+    for (const item of item_list) {
+        const invItem = new InventoryItem(item, item, item, item);
+        const added = container.AddItem(item);
+        container.addItemOnServer(invItem);
+    }
     object.transmitCompleteItemToClients();
 }
 
 
-const spawnAllLoot = (lootList: Loot[]) => {
+export const spawnAllLoot = (lootList: Loot[]) => {
     for (const loot of lootList) {
         createContainer(loot);
     }
 }
+
+
+// 7221, 5529
