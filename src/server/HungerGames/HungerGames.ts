@@ -8,11 +8,13 @@
 
 // PipeWrench API.
 import * as Events from '@asledgehammer/pipewrench-events';
-import { ISBarbedWire, ISBuildingObject, IsoPlayer, IsoThumpable, ItemContainer, getCell, getOnlinePlayers, getWorld, isServer, sendServerCommand} from "@asledgehammer/pipewrench"
-import { HungerGameMatch, HungerGameState } from './api/HungerGamesAPI';
+import { IsoPlayer, isServer, sendServerCommand} from "@asledgehammer/pipewrench"
+import { HungerGameState } from './api/HungerGamesAPI';
 import { jailPlayer } from './api/HungerGamesAPI';
 import { Coordinates, spawnContainer } from './api/Loot';
-import { cleanArena, createArena, createArena1 } from './api/Arena';
+import { ArenaConfig, cleanArena, createArena, loadArena, saveArena } from './api/Arena';
+import * as dkjson from "dkjson";
+
 // Example reference API.
 
 
@@ -33,9 +35,6 @@ Events.onClientCommand.addListener((module, command, player, args) => {
   
   //Catch client commands here
   if (command == "ping") {
-      if (args.command == "register") {
-          registerForGame(player);
-      }
     //   if (args.command == "create") {
     //       createMatch();
     //       print(state.matches.length);
@@ -45,7 +44,7 @@ Events.onClientCommand.addListener((module, command, player, args) => {
         const x = player.getX();
         const y = player.getY();
         const z = player.getZ();
-        createArena(Math.round(x), Math.round(y), Math.round(z), args.height, args.width);
+        // createArena(Math.round(x), Math.round(y), Math.round(z), args.height, args.width);
     }
     if (args.command == "clean") {
         cleanArena(player);
@@ -64,45 +63,63 @@ Events.onClientCommand.addListener((module, command, player, args) => {
     if (args.command == "coords") {
         getCoords(player)
     }
-    if (args.command == "arena1") {
-        createArena1();
+    if (args.command == "create") {
+        createArena(args.name);
+    }
+    if (args.command == "write") {
+        const ArenaCenter: Coordinates = {
+            x: 7221,
+            y: 5532,
+            z: 0
+          }
+          const ArenaHeight = 30;
+          const ArenaWidth = 30;
+        const arena1: ArenaConfig = {
+            center: ArenaCenter,
+            height: ArenaHeight,
+            width: ArenaWidth,
+            loot: []
+          }
+          print("Arena: ", arena1, arena1.center.x);
+        saveArena(arena1, "arena1");
+        print("Arena saved");
+    }
+
+    if (args.command == "load") {
+        print("loading arena")
+        const arena = loadArena("arena1");
+        print("Arena loaded: ", arena);
+    }
+    if (args.command == "arenas") {
+        const arenas = getArenas();
+        const arenaString = dkjson.encode(arenas);
+        print("arena list: ", arenaString);
+        sendServerCommand(player, "HungerGames", "pong", {"command": "arenalist", "res": arenaString});
     }
   }
 })
+
+const getArenas = (): ArenaConfig[] => {
+    const arenas: ArenaConfig[] = [];
+    let x = 0;
+    let done = false;
+    while (done == false) {
+        const arena = loadArena("arena"+x);
+        if (arena == null) {
+            done = true;
+            break;
+        }
+        arenas.push(arena);
+        x++;
+    }
+    return arenas;
+}
 
 const getCoords = (player: IsoPlayer) => {
     const x = player.getX();
     const y = player.getY();
     const z = player.getZ();
     print(`X: ${x}, Y: ${y}, Z: ${z}`)
-}
-
-
-const registerForGame = (player: IsoPlayer) => {
-  if (state.matches.length < 1) {
-      //create new match (todo)
-      sendServerCommand(player, "HungerGames", "pong", {"command": "register", "res": "No Matches"})
-  }
-  //iterate through matches and find one with space
-  for (let i = 0; i < state.matches.length; i++) {
-      if (state.matches[i].players.length <= state.matches[i].maxPlayers && state.matches[i].started == false && state.matches[i].matchmaking == true) {
-          //join match
-          sendServerCommand(player, "HungerGames", "pong", {"command": "register", "res": "Joined Match"})
-          return;
-      }
-  }
-}
-
-const createMatch = () => {
-  const match: HungerGameMatch = {
-      players: [],
-      remainingPlayers: 0,
-      maxPlayers: 8,
-      started: false,
-      matchmaking: true,
-      inventories: new Map<IsoPlayer, ItemContainer>(),
-  };
-  state.matches.push(match);
 }
 
 

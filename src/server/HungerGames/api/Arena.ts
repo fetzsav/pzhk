@@ -1,41 +1,51 @@
-import { IsoPlayer, IsoThumpable, getWorld, isServer } from "@asledgehammer/pipewrench";
-import { ContainerSize, Coordinates, Loot, LootType, spawnAllLoot } from "./Loot";
+/**
+ * @noSelfInFile
+ *
+ * NOTE: Use this at the top of your TypeScript files. This prevents functions & methods
+ *       from prepending a 'self' reference, which is usually not necessary and complicates
+ *       rendered Lua code.
+ */
 
-export const createArena = (x: number, y: number, z: number, height_x: number, width_y: number) => {
-    const xOffset = height_x / 2;
-    const yOffset = width_y / 2;
-    print("Create arena called", "x: ", x, "y: ", y, "z: ", z, "height_x: ", height_x, "width_y: ", width_y);
+
+import { IsoPlayer, IsoThumpable, getFileReader, getFileWriter, getWorld, isServer } from "@asledgehammer/pipewrench";
+import { Coordinates, Loot, spawnAllLoot } from "./Loot";
+import * as dkjson from "dkjson";
+
+export const buildArenaWalls = (arena: ArenaConfig) => {
+    const xOffset = arena.height / 2;
+    const yOffset = arena.width / 2;
+    print("Create arena called", "x: ", arena.center.x, "y: ", arena.center.y, "z: ", arena.center.z, "height_x: ", arena.height, "width_y: ", arena.width);
 
 
     //CREATING LR WALLS
-    const bottom_left_starting_point_x = x - xOffset;
-    const bottom_left_ending_point_x = x + xOffset;
-    const bottom_left_starting_point_y = y - yOffset;
-    const bottom_left_ending_point_y = y + yOffset;
+    const bottom_left_starting_point_x = arena.center.x - xOffset;
+    const bottom_left_ending_point_x = arena.center.x + xOffset;
+    const bottom_left_starting_point_y = arena.center.y - yOffset;
+    const bottom_left_ending_point_y = arena.center.y + yOffset;
     print("bottom_left_starting_point_x: ", bottom_left_starting_point_x);
 
     //right
     for (let x = bottom_left_starting_point_x+1; x < bottom_left_ending_point_x; x++) {
-        createWall(x, y-(yOffset), z, "fencing_01_89");
+        createWall(x, arena.center.y-(yOffset), arena.center.z, "fencing_01_89");
     }
 
 
     //left
     for (let x = bottom_left_starting_point_x; x < bottom_left_ending_point_x; x++) {
-        createWall(x, y+(yOffset), z, "fencing_01_89");
+        createWall(x, arena.center.y+(yOffset), arena.center.z, "fencing_01_89");
     }
 
     //top
     for (let y = bottom_left_starting_point_y; y < bottom_left_ending_point_y; y++) {
         if (y == bottom_left_starting_point_y) {
-            createWall(x-(xOffset), y, z, "fencing_01_92");
+            createWall(arena.center.x-(xOffset), y, arena.center.z, "fencing_01_92");
         }
-        createWall(x-(xOffset), y, z, "fencing_01_90");
+        createWall(arena.center.x-(xOffset), y, arena.center.z, "fencing_01_90");
     }
 
     //bottom
     for (let y = bottom_left_starting_point_y; y < bottom_left_ending_point_y; y++) {
-        createWall(x+(xOffset), y, z, "fencing_01_90");
+        createWall(arena.center.x+(xOffset), y, arena.center.z, "fencing_01_90");
     }
   }
 
@@ -57,7 +67,7 @@ export const createArena = (x: number, y: number, z: number, height_x: number, w
   }
 
 
-  export const createWall = (x: any, y: any, z: any, wallname: string) => {
+  export const createWall = (x: number, y: number, z: number, wallname: string) => {
     if(!isServer()) return;
     const cell = getWorld().getCell();
     const square = cell.getGridSquare(x, y, z);
@@ -70,39 +80,41 @@ export const createArena = (x: number, y: number, z: number, height_x: number, w
   }
 
 
+export interface ArenaConfig {
+  center: Coordinates;
+  height: number;
+  width: number;
+  loot: Loot[];
+}
 
-
-// ARENA 1 PRIMS
-
-export const createArena1 = () => {
-
+export const createArena = (name: string) => {
   //Arena Walls
-  const ArenaCenter: Coordinates = {
-    x: 7221,
-    y: 5532,
-    z: 0
+  const arena = loadArena(name);
+  if (arena == null) {
+    print("Arena not found");
+    return;
   }
-  const ArenaHeight = 30;
-  const ArenaWidth = 30;
-  createArena(ArenaCenter.x, ArenaCenter.y, ArenaCenter.z, ArenaHeight, ArenaWidth);
-  //Arena Loot
-  const bigLootLocations: Coordinates[] = [
-    {x: 7221, y: 5529, z: 0},
-    {x: 7221, y: 5532, z: 0},
-    {x: 7223, y: 5529, z: 0},
-    {x: 7223, y: 5532, z: 0},
-  ]
+  buildArenaWalls(arena);
+  spawnAllLoot(arena.loot);
+}
 
-  const LootList: Loot[] = [];
 
-  for (const coords of bigLootLocations) {
-    const loot: Loot = {
-      location: coords,
-      size: ContainerSize.Large,
-      type: [LootType.Weapons]
-    }
-    LootList.push(loot);
+export const saveArena = (arena: ArenaConfig, name: string) => {
+  const fileWriter = getFileWriter(name+".json", true, false);
+  fileWriter.write(dkjson.encode(arena, {indent: true}));
+  fileWriter.close();
+  // const buffer = new BufferedWriter(fileWriter);
+  // buffer.write("arena test");
+}
+
+export const loadArena = (name: string): ArenaConfig | null => {
+  const fileReader = getFileReader(name+".json", false);
+  let buffer = "";
+  let line = fileReader.readLine();
+  while (line != null) {
+    buffer = buffer.concat(line);
+    line = fileReader.readLine();
   }
-  spawnAllLoot(LootList);
-
+  const arena = dkjson.decode(buffer);
+  return arena as ArenaConfig;
 }

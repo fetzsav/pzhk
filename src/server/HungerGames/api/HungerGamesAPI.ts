@@ -1,13 +1,13 @@
 
-// /**
-//  * @noSelfInFile
-//  *
-//  * NOTE: Use this at the top of your TypeScript files. This prevents functions & methods
-//  *       from prepending a 'self' reference, which is usually not necessary and complicates
-//  *       rendered Lua code.
-//  */
+/**
+ * @noSelfInFile
+ *
+ * NOTE: Use this at the top of your TypeScript files. This prevents functions & methods
+ *       from prepending a 'self' reference, which is usually not necessary and complicates
+ *       rendered Lua code.
+ */
 
-import { IsoPlayer, IsoThumpable, ItemContainer, getOnlinePlayers, getWorld, isServer } from "@asledgehammer/pipewrench";
+import { IsoPlayer, ItemContainer, getOnlinePlayers,} from "@asledgehammer/pipewrench";
 import { createWall } from "./Arena";
 
 // import { InventoryContainer, IsoPlayer, ItemContainer, getConnectedPlayers, isClient, isServer, sendServerCommand, triggerEvent } from "@asledgehammer/pipewrench";

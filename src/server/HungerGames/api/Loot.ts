@@ -68,6 +68,7 @@ const createContainer = (loot: Loot) => {
                 break;
         }
     }
+    
     // Select items to be added in crate
     const spawnedItems = getRandomItems(itemList, 6);
     // Create the container
