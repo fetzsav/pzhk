@@ -101,10 +101,12 @@ Events.onClientCommand.addListener((module, command, player, args) => {
 
 const getArenas = (): ArenaConfig[] => {
     const arenas: ArenaConfig[] = [];
-    let x = 0;
+    let x = 1;
     let done = false;
     while (done == false) {
-        const arena = loadArena("arena"+x);
+        const arena_name = "arena"+x.toString();
+        print("Loading arena: ", arena_name);
+        const arena = loadArena(arena_name);
         if (arena == null) {
             done = true;
             break;

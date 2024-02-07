@@ -110,7 +110,13 @@ export const saveArena = (arena: ArenaConfig, name: string) => {
 export const loadArena = (name: string): ArenaConfig | null => {
   const fileReader = getFileReader(name+".json", false);
   let buffer = "";
-  let line = fileReader.readLine();
+  let line: string;
+  try {
+    line = fileReader.readLine();
+  } catch (e) {
+    print("Arena not found");
+    return null;
+  }
   while (line != null) {
     buffer = buffer.concat(line);
     line = fileReader.readLine();
